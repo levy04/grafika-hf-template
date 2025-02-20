@@ -1,11 +1,11 @@
 //=============================================================================================
-// OpenGL keretrendszer: GLFW Ès GLAD alap˙ implement·ciÛ
+// OpenGL keretrendszer: GLFW √©s GLAD alap√∫ implement√°ci√≥
 //=============================================================================================
 #include "framework.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-// Keretrendszer ·llapota
+// Keretrendszer √°llapota
 static int minorNumber = 3, majorNumber = 3;
 static int windowWidth = 600, windowHeight = 600;
 static const char * windowCaption = "Grafika";
@@ -13,7 +13,7 @@ static GLFWwindow* window;
 static bool screenRefresh = true;
 static glApp * pApp = nullptr;
 
-// EsemÈnykezelık
+// Esem√©nykezel≈ëk
 static void error_callback(int error, const char* description) {
 	fprintf(stderr, "Error: %s\n", description);
 }
@@ -47,7 +47,7 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 	pApp->onMouseMotion((int)xpos, (int)ypos);
 }
 
-// Applik·ciÛ konstruktora
+// Applik√°ci√≥ konstruktora
 glApp::glApp(unsigned int _majorNumber, unsigned int _minorNumber, unsigned int _windowWidth, unsigned int _windowHeight, const char * _windowCaption) {
 	majorNumber = _majorNumber;
 	minorNumber = _minorNumber;
@@ -57,7 +57,7 @@ glApp::glApp(unsigned int _majorNumber, unsigned int _minorNumber, unsigned int 
 	pApp = this;
 }
 
-// Applik·ciÛ konstruktora
+// Applik√°ci√≥ konstruktora
 glApp::glApp(const char * _windowCaption) {
 	majorNumber = 3;
 	minorNumber = 3;
@@ -67,18 +67,18 @@ glApp::glApp(const char * _windowCaption) {
 	pApp = this;
 }
 
-// Rajzold ˙jra az alkalmaz·si ablakot
+// Rajzold √∫jra az alkalmaz√°si ablakot
 void glApp::refreshScreen() {
 	screenRefresh = true;
 }
 
-// LekÈrdezÈses klaviat˙ra kezelÈs
+// Lek√©rdez√©ses klaviat√∫ra kezel√©s
 bool pollKey(int key) {
 	return (glfwGetKey(window, key) == GLFW_PRESS);
 }
 
 int main(void) {
-	// AlkalmazÛi ablak lÈtrehoz·sa
+	// Alkalmaz√≥i ablak l√©trehoz√°sa
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit()) exit(EXIT_FAILURE);
 
@@ -92,7 +92,7 @@ int main(void) {
 		exit(EXIT_FAILURE);
 	}
 
-	// EsemÈnykezelık regisztr·l·sa
+	// Esem√©nykezel≈ëk regisztr√°l√°sa
 	//glfwSetKeyCallback(window, key_callback);
 	glfwSetCharCallback(window, character_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -103,20 +103,20 @@ int main(void) {
 	gladLoadGL();
 	glfwSwapInterval(1);
 
-	// Applik·ciÛ inicializ·l·sa
+	// Applik√°ci√≥ inicializ√°l√°sa
 	pApp->onInitialization();
 	float startTime = 0;
 
-	// ‹zenetkezelı hurok
+	// √úzenetkezel≈ë hurok
 	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents(); // esemÈnyek lekÈrdezÈse Ès reakciÛ
+		glfwPollEvents(); // esem√©nyek lek√©rdez√©se √©s reakci√≥
 
-		float endTime = (float)glfwGetTime();    // idı lekÈrdezÈse
-		pApp->onTimeElapsed(startTime, endTime); // anim·ciÛ
+		float endTime = (float)glfwGetTime();    // id≈ë lek√©rdez√©se
+		pApp->onTimeElapsed(startTime, endTime); // anim√°ci√≥
 		startTime = endTime;
 
 		if (screenRefresh) {
-			pApp->onDisplay();       // rajzol·s
+			pApp->onDisplay();       // rajzol√°s
 			glfwSwapBuffers(window); // buffercsere
 			screenRefresh = false;
 		}

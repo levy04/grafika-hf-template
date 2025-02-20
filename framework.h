@@ -37,7 +37,7 @@ class GPUProgram {
 	GLuint shaderProgramId = 0;
 	bool waitError = true;
 
-	bool checkShader(unsigned int shader, std::string message) { // shader fordÌt·si hib·k kezelÈse
+	bool checkShader(unsigned int shader, std::string message) { // shader ford√≠t√°si hib√°k kezel√©se
 		GLint infoLogLength = 0, result = 0;
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
@@ -51,7 +51,7 @@ class GPUProgram {
 		return true;
 	}
 
-	bool checkLinking(unsigned int program) { 	// shader szerkesztÈsi hib·k kezelÈse
+	bool checkLinking(unsigned int program) { 	// shader szerkeszt√©si hib√°k kezel√©se
 		GLint infoLogLength = 0, result = 0;
 		glGetProgramiv(program, GL_LINK_STATUS, &result);
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
@@ -65,7 +65,7 @@ class GPUProgram {
 		return true;
 	}
 
-	int getLocation(const std::string& name) {	// uniform v·ltozÛ cÌmÈnek lekÈrdezÈse
+	int getLocation(const std::string& name) {	// uniform v√°ltoz√≥ c√≠m√©nek lek√©rdez√©se
 		int location = glGetUniformLocation(shaderProgramId, name.c_str());
 		if (location < 0) printf("uniform %s cannot be set\n", name.c_str());
 		return location;
@@ -108,7 +108,7 @@ public:
 	}
 
 	void create(const char* const vertexShaderSource, const char * const fragmentShaderSource, const char * const geometryShaderSource = nullptr) {
-		// Program lÈtrehoz·sa a forr·s sztringbıl
+		// Program l√©trehoz√°sa a forr√°s sztringb≈ël
 		GLuint  vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		if (!vertexShader) {
 			printf("Error in vertex shader creation\n");
@@ -118,7 +118,7 @@ public:
 		glCompileShader(vertexShader);
 		if (!checkShader(vertexShader, "Vertex shader error")) return;
 
-		// Program lÈtrehoz·sa a forr·s sztringbıl, ha van geometria ·rnyalÛ
+		// Program l√©trehoz√°sa a forr√°s sztringb≈ël, ha van geometria √°rnyal√≥
 		GLuint geometryShader = 0;
 		if (geometryShaderSource != nullptr) {
 			geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
@@ -131,7 +131,7 @@ public:
 			if (!checkShader(geometryShader, "Geometry shader error")) return;
 		}
 
-		// Program lÈtrehoz·sa a forr·s sztringbıl
+		// Program l√©trehoz√°sa a forr√°s sztringb≈ël
 		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 		if (!fragmentShader) {
 			printf("Error in fragment shader creation\n");
@@ -151,7 +151,7 @@ public:
 		glAttachShader(shaderProgramId, fragmentShader);
 		if (geometryShader > 0) glAttachShader(shaderProgramId, geometryShader);
 
-		// SzerkesztÈs
+		// Szerkeszt√©s
 		if (!link()) return;
 
 		// Ez fusson
@@ -252,7 +252,7 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, vtx.size() * sizeof(T), &vtx[0], GL_DYNAMIC_DRAW);
 	}
-	void Bind() { glBindVertexArray(vao); glBindBuffer(GL_ARRAY_BUFFER, vbo); } // aktiv·l·s
+	void Bind() { glBindVertexArray(vao); glBindBuffer(GL_ARRAY_BUFFER, vbo); } // aktiv√°l√°s
 	void Draw(GPUProgram* prog, int type, vec3 color) {
 		if (vtx.size() > 0) {
 			prog->setUniform(color, "color");
@@ -273,8 +273,8 @@ class Texture {
 public:
 #ifdef FILE_OPERATIONS
 	Texture(const fs::path pathname, bool transparent = false, int sampling = GL_LINEAR) {
-		if (textureId == 0) glGenTextures(1, &textureId);  				// azonosÌtÛ gener·l·s
-		glBindTexture(GL_TEXTURE_2D, textureId);    // kˆtÈs
+		if (textureId == 0) glGenTextures(1, &textureId);  				// azonos√≠t√≥ gener√°l√°s
+		glBindTexture(GL_TEXTURE_2D, textureId);    // k√∂t√©s
 		unsigned int width, height;
 		unsigned char* pixels;
 		if (transparent) {
@@ -295,15 +295,15 @@ public:
 			lodepng_decode24_file(&pixels, &width, &height, pathname.string().c_str());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels); // GPU-ra
 		}
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling); // sz˚rÈs
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling); // sz≈±r√©s
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling);
 		printf("%s, w: %d, h: %d\n", pathname.string().c_str(), width, height);
 	}
 #endif
 	Texture(int width, int height) {
-		glGenTextures(1, &textureId); // azonosÌtÛ gener·l·sa
-		glBindTexture(GL_TEXTURE_2D, textureId);    // ez az aktÌv innentıl
-		// procedur·lis text˙ra elı·llÌt·sa programmal
+		glGenTextures(1, &textureId); // azonos√≠t√≥ gener√°l√°sa
+		glBindTexture(GL_TEXTURE_2D, textureId);    // ez az akt√≠v innent≈ël
+		// procedur√°lis text√∫ra el≈ë√°ll√≠t√°sa programmal
 		const vec3 yellow(1, 1, 0), blue(0, 0, 1);
 		std::vector<vec3> image(width * height);
 		for (int x = 0; x < width; x++) for (int y = 0; y < height; y++) {
@@ -315,16 +315,16 @@ public:
 	}
 
 	Texture(int width, int height, std::vector<vec3>& image) {
-		glGenTextures(1, &textureId); // azonosÌtÛ gener·l·sa
-		glBindTexture(GL_TEXTURE_2D, textureId);    // ez az aktÌv innentıl
+		glGenTextures(1, &textureId); // azonos√≠t√≥ gener√°l√°sa
+		glBindTexture(GL_TEXTURE_2D, textureId);    // ez az akt√≠v innent≈ël
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, &image[0]); // To GPU
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // sampling
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 
 	void Bind(int textureUnit) {
-		glActiveTexture(GL_TEXTURE0 + textureUnit); // aktiv·l·s
-		glBindTexture(GL_TEXTURE_2D, textureId); // piros nyÌl
+		glActiveTexture(GL_TEXTURE0 + textureUnit); // aktiv√°l√°s
+		glBindTexture(GL_TEXTURE_2D, textureId); // piros ny√≠l
 	}
 	~Texture() {
 		if (textureId > 0) glDeleteTextures(1, &textureId);
@@ -340,21 +340,21 @@ class glApp {
 //---------------------------
 public:
 	glApp(const char * caption);
-	glApp(unsigned int major, unsigned int minor,        // KÈrt OpenGL major.minor verziÛ
-		  unsigned int winWidth, unsigned int winHeight, // AlkalmazÛi ablak felbont·sa
-		  const char * caption);       // MegfogÛcsÌk szˆvege
-	void refreshScreen(); // Ablak ÈrvÈnytelenÌtÈse
-	// EsemÈnykezelık
-	virtual void onInitialization() {}    // Inicializ·ciÛ
-	virtual void onDisplay() {}           // Ablak ÈrvÈnytelen
-	virtual void onKeyboard(int key) {}   // Klaviat˙ra gomb lenyom·s
-	virtual void onKeyboardUp(int key) {} // Klaviat˙ra gomb elenged
-	// EgÈr gomb lenyom·s/elengedÈs
+	glApp(unsigned int major, unsigned int minor,        // K√©rt OpenGL major.minor verzi√≥
+		  unsigned int winWidth, unsigned int winHeight, // Alkalmaz√≥i ablak felbont√°sa
+		  const char * caption);       // Megfog√≥cs√≠k sz√∂vege
+	void refreshScreen(); // Ablak √©rv√©nytelen√≠t√©se
+	// Esem√©nykezel≈ëk
+	virtual void onInitialization() {}    // Inicializ√°ci√≥
+	virtual void onDisplay() {}           // Ablak √©rv√©nytelen
+	virtual void onKeyboard(int key) {}   // Klaviat√∫ra gomb lenyom√°s
+	virtual void onKeyboardUp(int key) {} // Klaviat√∫ra gomb elenged
+	// Eg√©r gomb lenyom√°s/elenged√©s
 	virtual void onMousePressed(MouseButton but, int pX, int pY) {}
 	virtual void onMouseReleased(MouseButton but, int pX, int pY) {}
-	// EgÈr mozgat·s lenyomott gombbal
+	// Eg√©r mozgat√°s lenyomott gombbal
 	virtual void onMouseMotion(int pX, int pY) {}
-	// Telik az idı
+	// Telik az id≈ë
 	virtual void onTimeElapsed(float startTime, float endTime) {}
 };
 

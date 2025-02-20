@@ -20,7 +20,7 @@ libs = [
 
 # Source files
 srcs = files(
-    'src/skeleton.cpp',
+    'src/green.cpp',
     'framework.h',
     'framework.cpp'
 )
