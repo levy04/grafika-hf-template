@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Build and run",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "meson_build",
+        }
+    ]
+}
