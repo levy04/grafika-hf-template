@@ -1,11 +1,11 @@
 //=============================================================================================
-// OpenGL keretrendszer: GLFW ï¿½s GLAD alapï¿½ implementï¿½ciï¿½
+// OpenGL keretrendszer: GLFW és GLAD alapú implementáció
 //=============================================================================================
 #include "framework.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-// Keretrendszer ï¿½llapota
+// Keretrendszer állapota
 static int minorNumber = 3, majorNumber = 3;
 static int windowWidth = 600, windowHeight = 600;
 static const char * windowCaption = "Grafika";
@@ -13,7 +13,7 @@ static GLFWwindow* window;
 static bool screenRefresh = true;
 static glApp * pApp = nullptr;
 
-// Esemï¿½nykezelï¿½k
+// Eseménykezelõk
 static void error_callback(int error, const char* description) {
 	fprintf(stderr, "Error: %s\n", description);
 }
@@ -47,7 +47,7 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 	pApp->onMouseMotion((int)xpos, (int)ypos);
 }
 
-// Applikï¿½ciï¿½ konstruktora
+// Applikáció konstruktora
 glApp::glApp(unsigned int _majorNumber, unsigned int _minorNumber, unsigned int _windowWidth, unsigned int _windowHeight, const char * _windowCaption) {
 	majorNumber = _majorNumber;
 	minorNumber = _minorNumber;
@@ -57,7 +57,7 @@ glApp::glApp(unsigned int _majorNumber, unsigned int _minorNumber, unsigned int 
 	pApp = this;
 }
 
-// Applikï¿½ciï¿½ konstruktora
+// Applikáció konstruktora
 glApp::glApp(const char * _windowCaption) {
 	majorNumber = 3;
 	minorNumber = 3;
@@ -67,18 +67,18 @@ glApp::glApp(const char * _windowCaption) {
 	pApp = this;
 }
 
-// Rajzold ï¿½jra az alkalmazï¿½si ablakot
+// Rajzold újra az alkalmazási ablakot
 void glApp::refreshScreen() {
 	screenRefresh = true;
 }
 
-// Lekï¿½rdezï¿½ses klaviatï¿½ra kezelï¿½s
+// Lekérdezéses klaviatúra kezelés
 bool pollKey(int key) {
 	return (glfwGetKey(window, key) == GLFW_PRESS);
 }
 
 int main(void) {
-	// Alkalmazï¿½i ablak lï¿½trehozï¿½sa
+	// Alkalmazói ablak létrehozása
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit()) exit(EXIT_FAILURE);
 
@@ -92,7 +92,7 @@ int main(void) {
 		exit(EXIT_FAILURE);
 	}
 
-	// Esemï¿½nykezelï¿½k regisztrï¿½lï¿½sa
+	// Eseménykezelõk regisztrálása
 	//glfwSetKeyCallback(window, key_callback);
 	glfwSetCharCallback(window, character_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -103,20 +103,20 @@ int main(void) {
 	gladLoadGL();
 	glfwSwapInterval(1);
 
-	// Applikï¿½ciï¿½ inicializï¿½lï¿½sa
+	// Applikáció inicializálása
 	pApp->onInitialization();
 	float startTime = 0;
 
-	// ï¿½zenetkezelï¿½ hurok
+	// Üzenetkezelõ hurok
 	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents(); // esemï¿½nyek lekï¿½rdezï¿½se ï¿½s reakciï¿½
+		glfwPollEvents(); // események lekérdezése és reakció
 
-		float endTime = (float)glfwGetTime();    // idï¿½ lekï¿½rdezï¿½se
-		pApp->onTimeElapsed(startTime, endTime); // animï¿½ciï¿½
+		float endTime = (float)glfwGetTime();    // idõ lekérdezése
+		pApp->onTimeElapsed(startTime, endTime); // animáció
 		startTime = endTime;
 
 		if (screenRefresh) {
-			pApp->onDisplay();       // rajzolï¿½s
+			pApp->onDisplay();       // rajzolás
 			glfwSwapBuffers(window); // buffercsere
 			screenRefresh = false;
 		}
