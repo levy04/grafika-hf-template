@@ -10,8 +10,8 @@ struct Object {
     void addPoint(vec2 p) { points.Vtx().push_back(p); }
 
     void sync() { points.updateGPU(); }
-    
-    void draw(GPUProgram* prog, int primitive_type, vec3 color) { 
+
+    void draw(GPUProgram* prog, int primitive_type, vec3 color) {
         points.Draw(prog, primitive_type, color);
     }
 };

@@ -2,12 +2,12 @@
 
 #include "object.hpp"
 
-struct PointCollection : public Object { 
+struct PointCollection : public Object {
     vec2 find_nearest_point(vec2 source) {
         vec2 nearest = source;
         double min_distance = 0;
 
-        for(auto&& point : points.Vtx()) {
+        for (auto&& point : points.Vtx()) {
             double current_dist = distance(source, point);
             if (current_dist < min_distance && current_dist != 0) {
                 min_distance = current_dist;

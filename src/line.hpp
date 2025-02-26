@@ -9,9 +9,9 @@ struct Line : public Object {
         this->addPoint(a);
         this->addPoint(b);
 
-        v = a - b;     // irányvektor
+        v = a - b;          // irányvektor
         vec2 n(-v.y, v.x);  // normálvektor
-        float d = (-1) * a.x * n.x + a.y*n.y; 
+        float d = (-1) * a.x * n.x + a.y * n.y;
 
         printf("\tImplicit: %f x + %f y + %f = 0\n", n.x, n.y, d);
         printf("\tExplicit: r(t) = (%f, %f) + (%f, %f)t\n", a.x, a.y, v.x, v.y);
@@ -24,7 +24,7 @@ struct Line : public Object {
     bool contains_point(vec2 point) {
         vec2 n(-v.y, v.x);
 
-        Line perp(point, point+n);
+        Line perp(point, point + n);
         vec2 intersect = intersection_point(perp);
 
         return distance(point, intersect) < 0.01;
