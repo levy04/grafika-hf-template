@@ -21,9 +21,6 @@ libs = [
 # Source files
 srcs = files(
     'src/main.cpp',
-    'src/object.hpp',
-    'src/PointCollection.hpp',
-    'src/line.hpp',
     'framework.h',
     'framework.cpp'
 )
