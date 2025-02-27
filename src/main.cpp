@@ -64,8 +64,8 @@ struct Line {
         end_point = b;
         coords = cross(a, b);
 
-        vec3 v(a.x - b.x, a.y - b.y, 0);  // irányvektor
-        vec3 n(v.y, -v.x, 0);             // normálvektor
+        vec3 v(a.x - b.x, a.y - b.y, 0);
+        vec3 n(v.y, -v.x, 0);
         float d = (-1) * a.x * n.x + a.y * n.y;
 
         if (print) {
@@ -74,14 +74,6 @@ struct Line {
                    v.y);
         }
     }
-
-    bool operator==(const Line& line) {
-        return (this->coords == line.coords &&
-                this->start_point == line.start_point &&
-                this->end_point == line.end_point);
-    }
-
-    bool operator!=(const Line& line) { return !(*this == line); }
 
     vec3 intersection_point(const Line& line) {
         vec3 inter = cross(this->coords, line.coords);
@@ -212,12 +204,15 @@ class pointsAndLinesApp : public glApp {
                 break;
             case 'l':
                 state = LINES_FIRST;
+                printf("Define lines\n");
                 break;
             case 'm':
                 state = SELECT_MOVED_LINE;
+                printf("Move\n");
                 break;
             case 'i':
                 state = INTERSECT_FIRST;
+                printf("Intersect\n");
                 break;
             default:
                 break;
@@ -229,10 +224,10 @@ class pointsAndLinesApp : public glApp {
             case POINTS:
                 if (button == MOUSE_LEFT) {
                     vec3 point = PixelToNDC(pX, pY);
-                    printf("Point %f, %f added\n", point.x, point.y);
                     pcoll->add(point);
                     pcoll->sync();
                     refreshScreen();
+                    printf("Point %f, %f added\n", point.x, point.y);
                 }
                 break;
 
@@ -250,6 +245,7 @@ class pointsAndLinesApp : public glApp {
                         pcoll->find_nearest_point(PixelToNDC(pX, pY));
                     state = LINES_FIRST;
 
+                    printf("Line added\n");
                     Line line(selected_points[0], selected_points[1], true);
                     std::pair<vec3, vec3> borders = line.bordering_points();
 
