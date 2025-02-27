@@ -27,9 +27,9 @@ const char* fragSource = R"(
 struct Object {
     Geometry<vec3> points;
 
-    void add(vec3 p) { points.Vtx().push_back(p); }
+    void add(const vec3& p) { points.Vtx().push_back(p); }
     void sync() { points.updateGPU(); }
-    void draw(GPUProgram* prog, int primitive_type, vec3 color) {
+    void draw(GPUProgram* prog, const int& primitive_type, const vec3& color) {
         points.Draw(prog, primitive_type, color);
     }
 };
@@ -37,7 +37,7 @@ struct Object {
 
 // PointCollection
 struct PointCollection : public Object {
-    vec3 find_nearest_point(vec3 source) {
+    vec3 find_nearest_point(const vec3& source) {
         vec3 nearest = points.Vtx()[0];
         float min_distance = 1000000.0;
 
@@ -54,15 +54,14 @@ struct PointCollection : public Object {
 //
 
 // Line
-struct Line : public Object {
-    vec3 point_a, point_b;
+struct Line {
+    vec3 start_point, end_point;
     vec3 coords;
 
-    Line(vec3 a = vec3(-1, -1, 1), vec3 b = vec3(1, 1, 1), bool print = false) {
-        this->add(a);
-        this->add(b);
-        point_a = a;
-        point_b = b;
+    Line(const vec3& a = vec3(-1, -1, 1), const vec3& b = vec3(1, 1, 1),
+         const bool& print = false) {
+        start_point = a;
+        end_point = b;
         coords = cross(a, b);
 
         vec3 v(a.x - b.x, a.y - b.y, 0);  // irányvektor
@@ -76,36 +75,52 @@ struct Line : public Object {
         }
     }
 
-    // static vec3 intersection_point(vec3 line_a, vec3 line_b) {
-    //     return cross(vec3(line_a.x, line_a.y, 0), vec3(line_b.x, line_b.y,
-    //     0));
-    // }
+    bool operator==(const Line& line) {
+        return (this->coords == line.coords &&
+                this->start_point == line.start_point &&
+                this->end_point == line.end_point);
+    }
 
-    static vec3 intersection_point(vec3 line_a, vec3 line_b) {
-        vec3 inter = cross(line_a, line_b);
+    bool operator!=(const Line& line) { return !(*this == line); }
+
+    vec3 intersection_point(const Line& line) {
+        vec3 inter = cross(this->coords, line.coords);
         return vec3(inter.x / inter.z, inter.y / inter.z, 1);
     }
 
-    bool contains_point(vec3 point) {
-        vec3 point_asdf(point.x + coords.y, point.y - coords.x, 1);
-        vec3 point_fdsa(-point.x - coords.y, -point.y + coords.x, 1);
-        Line perp_line = Line(point_asdf, point_fdsa);
-        vec3 perp = intersection_point(this->coords, perp_line.coords);
-
-        bool result = distance(point, perp) < 0.01;
-        printf("%s", result ? "\tYes\n" : "\tNo\n");
-
-        return result;
+    bool contains_point(const vec3& point) {
+        vec3 lineDir = end_point - start_point;
+        vec3 perpDir = normalize(vec3(lineDir.y, -lineDir.x, 0));
+        vec3 dirToPointA = start_point - point;
+        return abs(dot(perpDir, dirToPointA)) < 0.01;
     }
 
-    // std::pair<vec3, vec3> bordering_points() {
+    std::pair<vec3, vec3> bordering_points() {
+        vec3 lineDir = end_point - start_point;
 
-    // }
+        vec3 end_border = end_point;
+        do {
+            end_border += lineDir;
+        } while ((end_border.x < 1 && end_border.x > -1) ||
+                 (end_border.y < 1 && end_border.y > -1));
 
-    // void push_to_point(vec3 target) {
-    //     vec2 push(target.x - )
-    //     for (auto&& point : this->points.Vtx()) point += push;
-    // }
+        vec3 start_border = start_point;
+        do {
+            start_border -= lineDir;
+        } while ((start_border.x < 1 && start_border.x > -1) ||
+                 (start_border.y < 1 && start_border.y > -1));
+
+        return std::make_pair(start_border, end_border);
+    }
+
+    std::pair<vec3, vec3> push_to_point(vec3 target) {
+        vec3 lineDir = normalize(end_point - start_point);
+
+        start_point = target;
+        end_point = target + lineDir;
+
+        return bordering_points();
+    }
 };
 //
 
@@ -113,16 +128,33 @@ struct Line : public Object {
 struct LineCollection : public Object {
     std::vector<Line> lines;
 
-    void addLine(Line l) {
-        this->add(l.point_a);
-        this->add(l.point_b);
+    void addLine(const Line& l) {
+        this->add(l.start_point);
+        this->add(l.end_point);
+        this->sync();
         lines.push_back(l);
     }
 
-    vec3 get_closest_to_point(vec3 point) {
-        for (auto& line : lines)
-            if (line.contains_point(point)) return line.coords;
-        return lines[0].coords;
+    void move_line(int idx, vec3 target) {
+        std::pair<vec3, vec3> result = lines[idx].push_to_point(target);
+
+        lines[idx] = Line(result.first, result.second);
+
+        this->points.Vtx()[2 * idx] = result.first;
+        this->points.Vtx()[2 * idx + 1] = result.second;
+        this->sync();
+    }
+
+    Line* get_closest_to_point(const vec3& point) {
+        for (auto&& line : lines)
+            if (line.contains_point(point)) return &line;
+        return nullptr;
+    }
+
+    int get_closest_idx_to_point(const vec3& point) {
+        for (int i = 0; i < lines.size(); i++)
+            if (lines.at(i).contains_point(point)) return i;
+        return -1;
     }
 };
 //
@@ -131,7 +163,8 @@ enum t_state {
     POINTS,
     LINES_FIRST,
     LINES_SECOND,
-    MOVE_LINES,
+    SELECT_MOVED_LINE,
+    MOVING_LINE,
     INTERSECT_FIRST,
     INTERSECT_SECOND
 };
@@ -141,9 +174,10 @@ class pointsAndLinesApp : public glApp {
     t_state state;
     PointCollection* pcoll;
     LineCollection* lcoll;
-    GPUProgram* gpuProgram;  // csúcspont és pixel árnyalók
-    vec3 line_points[2];
-    vec3 lines[2];
+    GPUProgram* gpuProgram;
+    vec3 selected_points[2];
+    Line selected_lines[2];
+    int moved_line_idx;
 
     vec3 PixelToNDC(int pX, int pY) {
         return vec3(2.0f * pX / winWidth - 1.0f, 1.0f - 2.0f * pY / winHeight,
@@ -180,7 +214,7 @@ class pointsAndLinesApp : public glApp {
                 state = LINES_FIRST;
                 break;
             case 'm':
-                state = MOVE_LINES;
+                state = SELECT_MOVED_LINE;
                 break;
             case 'i':
                 state = INTERSECT_FIRST;
@@ -201,9 +235,10 @@ class pointsAndLinesApp : public glApp {
                     refreshScreen();
                 }
                 break;
+
             case LINES_FIRST:
                 if (button == MOUSE_LEFT) {
-                    line_points[0] =
+                    selected_points[0] =
                         pcoll->find_nearest_point(PixelToNDC(pX, pY));
                     state = LINES_SECOND;
                 }
@@ -211,15 +246,14 @@ class pointsAndLinesApp : public glApp {
 
             case LINES_SECOND:
                 if (button == MOUSE_LEFT) {
-                    line_points[1] =
+                    selected_points[1] =
                         pcoll->find_nearest_point(PixelToNDC(pX, pY));
                     state = LINES_FIRST;
 
-                    Line line(line_points[0], line_points[1], true);
-                    // std::pair<vec3, vec3> borders = line.bordering_points();
+                    Line line(selected_points[0], selected_points[1], true);
+                    std::pair<vec3, vec3> borders = line.bordering_points();
 
-                    // lcoll->addLine(Line(borders.first, borders.second));
-                    lcoll->addLine(line);
+                    lcoll->addLine(Line(borders.first, borders.second));
                     lcoll->sync();
                     refreshScreen();
                 }
@@ -227,22 +261,54 @@ class pointsAndLinesApp : public glApp {
 
             case INTERSECT_FIRST:
                 if (button == MOUSE_LEFT) {
-                    lines[0] = lcoll->get_closest_to_point(PixelToNDC(pX, pY));
+                    Line* selected =
+                        lcoll->get_closest_to_point(PixelToNDC(pX, pY));
+                    if (selected == nullptr) break;
+                    selected_lines[0] = *selected;
                     state = INTERSECT_SECOND;
                 }
                 break;
 
             case INTERSECT_SECOND:
                 if (button == MOUSE_LEFT) {
-                    lines[1] = lcoll->get_closest_to_point(PixelToNDC(pX, pY));
+                    Line* selected =
+                        lcoll->get_closest_to_point(PixelToNDC(pX, pY));
+                    if (selected == nullptr) break;
+                    selected_lines[1] = *selected;
                     state = INTERSECT_FIRST;
 
-                    pcoll->add(Line::intersection_point(lines[0], lines[1]));
+                    pcoll->add(selected_lines[0].intersection_point(
+                        selected_lines[1]));
                     pcoll->sync();
                     refreshScreen();
                 }
                 break;
+
+            case SELECT_MOVED_LINE:
+                if (button == MOUSE_LEFT) {
+                    int selected =
+                        lcoll->get_closest_idx_to_point(PixelToNDC(pX, pY));
+                    if (selected == -1) break;
+                    moved_line_idx = selected;
+                    state = MOVING_LINE;
+                }
+                break;
         }
+    }
+
+    void onMouseReleased(MouseButton button, int pX, int pY) {
+        if (state != MOVING_LINE) return;
+        if (button == MOUSE_LEFT) {
+            state = SELECT_MOVED_LINE;
+            moved_line_idx = -1;
+        }
+    }
+
+    void onMouseMotion(int pX, int pY) {
+        if (state != MOVING_LINE) return;
+        lcoll->move_line(moved_line_idx, PixelToNDC(pX, pY));
+        lcoll->sync();
+        refreshScreen();
     }
 };
 
