@@ -42,7 +42,7 @@ struct PointCollection : public Object {
         float min_distance = 1000000.0;
 
         for (auto&& point : points.Vtx()) {
-            float current_dist = distance(source, point);
+            float current_dist = sqrt(dot(source - point, source - point));
             if (current_dist < min_distance) {
                 min_distance = current_dist;
                 nearest = point;
@@ -98,7 +98,7 @@ struct Line {
 
         vec3 start_border = start_point;
         do {
-            start_border -= lineDir;
+            start_border = start_border - lineDir;
         } while ((start_border.x < 1 && start_border.x > -1) ||
                  (start_border.y < 1 && start_border.y > -1));
 
@@ -168,7 +168,7 @@ class pointsAndLinesApp : public glApp {
     LineCollection* lcoll;
     GPUProgram* gpuProgram;
     vec3 selected_points[2];
-    Line selected_lines[2];
+    Line* selected_lines[2];
     int moved_line_idx;
 
     vec3 PixelToNDC(int pX, int pY) {
@@ -190,11 +190,11 @@ class pointsAndLinesApp : public glApp {
     }
 
     void onDisplay() {
-        glClearColor(0.3f, 0.3f, 0.3f, 0);
+        glClearColor(0.4f, 0.4f, 0.4f, 0);
         glClear(GL_COLOR_BUFFER_BIT);
 
         pcoll->draw(gpuProgram, GL_POINTS, vec3(1, 0, 0));
-        lcoll->draw(gpuProgram, GL_LINES, vec3(0.043f, 0.89f, 0.89f));
+        lcoll->draw(gpuProgram, GL_LINES, vec3(0, 1, 1));
     }
 
     void onKeyboard(int key) {
@@ -241,8 +241,10 @@ class pointsAndLinesApp : public glApp {
 
             case LINES_SECOND:
                 if (button == MOUSE_LEFT) {
-                    selected_points[1] =
+                    vec3 selected =
                         pcoll->find_nearest_point(PixelToNDC(pX, pY));
+                    if (selected == selected_points[0]) break;
+                    selected_points[1] = selected;
                     state = LINES_FIRST;
 
                     printf("Line added\n");
@@ -260,7 +262,7 @@ class pointsAndLinesApp : public glApp {
                     Line* selected =
                         lcoll->get_closest_to_point(PixelToNDC(pX, pY));
                     if (selected == nullptr) break;
-                    selected_lines[0] = *selected;
+                    selected_lines[0] = selected;
                     state = INTERSECT_SECOND;
                 }
                 break;
@@ -270,11 +272,11 @@ class pointsAndLinesApp : public glApp {
                     Line* selected =
                         lcoll->get_closest_to_point(PixelToNDC(pX, pY));
                     if (selected == nullptr) break;
-                    selected_lines[1] = *selected;
+                    selected_lines[1] = selected;
                     state = INTERSECT_FIRST;
 
-                    pcoll->add(selected_lines[0].intersection_point(
-                        selected_lines[1]));
+                    pcoll->add(selected_lines[0]->intersection_point(
+                        *selected_lines[1]));
                     pcoll->sync();
                     refreshScreen();
                 }
@@ -288,6 +290,8 @@ class pointsAndLinesApp : public glApp {
                     moved_line_idx = selected;
                     state = MOVING_LINE;
                 }
+                break;
+            default:
                 break;
         }
     }
