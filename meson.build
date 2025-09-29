@@ -6,6 +6,7 @@ add_project_arguments('-Wall', '-Wextra', '-pedantic', '-D_HAS_CXX17=1', languag
 # Dependencies
 deps = [
     dependency('gl', required: true),
+    dependency('glm', required: true),
     dependency('glu', required: true),
     dependency('glut', required: true),
     dependency('glew', required: true),
@@ -30,6 +31,5 @@ executable('out', srcs, dependencies: deps, link_with: libs,
     include_directories: [
         'external/glad/include',
         'external/lodepng',
-        '/usr/include/glm'
     ]
 )

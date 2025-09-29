@@ -1,0 +1,39 @@
+name: Continuous Integration
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          # - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Install Meson and Ninja
+        run: pip install meson ninja
+        
+      - name: Install OpenGL dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y mesa-utils libgl1-mesa-dev libglu1-mesa-dev libglm-dev freeglut3-dev libglew-dev libglfw3-dev
+
+      - name: Install OpenGL dependencies (Mac)
+        if: matrix.os == 'macos-latest'
+        run: brew install mesa-glu glm glew glfw
+      
+      - name: Compile with Meson
+        run: meson setup build && meson compile -C build
