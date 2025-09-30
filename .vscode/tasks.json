@@ -9,7 +9,9 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"problemMatcher": ["$gcc"]
+			"problemMatcher": [
+				"$meson-gcc"
+			]
 		}
 	]
 }
