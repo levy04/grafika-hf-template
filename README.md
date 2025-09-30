@@ -1,23 +1,60 @@
 # grafika-hf-template
 
-[![Continuous Integration](https://github.com/levy04/grafika-hf-template/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/levy04/grafika-hf-template/actions/workflows/ci.yml)
+[![Build](https://github.com/levy04/grafika-hf-template/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/levy04/grafika-hf-template/actions/workflows/ci.yml)
 
-Egy template projekt a grafika házifeladatoknak. Nem hivatalos.
+An unofficial template project for computer graphics homeworks.
 
 ## Dependencies
 
-- meson ([Guide](https://mesonbuild.com/Quick-guide.html))
+- Meson
+- OpenGL dependencies (glfw3, glew, glut, etc...)
 
-## Setup
+### Windows
 
-A `meson setup build` paranccsal tudod setupolni a projektet, utána pedig a `meson compile -C build` paranccsal fordítani, végül pedig a `./build/out` paranccsal futtatni a programot.
+Follow the Meson [guide](https://mesonbuild.com/Getting-meson.html) on how to download and get started with Meson. You can use pip to install it, like so:
 
-Ha már egyszer setupoltál, akkor újrafordításhoz elég csak a `meson compile -C build` vagy egyszerűen a `ninja -C build` parancs.
+```bash
+pip3 install --user meson
+```
 
-Visual Studio Codeban elég egy F5 a `meson setup build` után.
+or simply download the MSI from their latest [releases](https://github.com/mesonbuild/meson/releases) page.
 
-Ha egy clean buildet szeretnél, akkor a `meson setup --wipe build` parancs újragenerálja a build mappát.
+### Ubuntu
 
-#### MSVC jóságok
+Run the following command to get the dependencies.
 
-A `framework.h` egy bizonyos `_HAS_CXX17` flaget vizsgál, hogy definiálva van-e. Tudtommal ezt a flaget csak az MSVC használja, gcc és clang esetén más flagek generálódnak amikor megadod, hogy milyen standardot használsz. A `framework.h` fájl átírása helyett inkább a `-D_HAS_CXX17=1` compiler argumentumot adtam meg.
+```bash
+sudo apt-get update && sudo apt-get install -y mesa-utils libgl1-mesa-dev \
+libglu1-mesa-dev libglm-dev freeglut3-dev libglew-dev libglfw3-dev \
+python3 ninja-build meson
+```
+
+### MacOS
+
+Run the following command to get the dependencies.
+
+```bash
+brew install mesa-glu glm glew glfw meson
+```
+
+## Usage
+
+First, use this project as a template to get your own repository. Make sure to make it private. Alternatively, you can download this repository as a zip file, and copy paste it into your main project.
+
+Make sure to write all your code in the `src.cpp` file, since JPorta is setup such that only one file is submittable. 
+
+Set your project up with the `meson setup build` command, after which you can compile your code with `meson compile -C build`. This will generate an executable located at `./build/out`. After initial project setup, you can recompile any time with `meson compile -C build` or `ninja -C build`. If you want a clean build, issuing `meson setup --wipe build` will regenerate the build directory.
+
+If you are using Visual Studio Code, there is an included `launch.json` and `tasks.json` to automate the compiling process, usually pressing `F5` will work on most setups. You will still need to initially run `meson setup build`.
+
+To get more familiar with Meson, you can read the [manual](https://mesonbuild.com/Manual.html), or look at some [samples](https://mesonbuild.com/Meson-sample.html).
+
+## Notes
+
+As the semesters go on, new versions of `framework.cpp` and `framework.h` may be released, or the framework may change entirely, and require seperate dependencies. If you notice any discrepancies, please send a pull request.
+
+### MSVC quirks
+
+Since the lecturer (most likely) uses MSVC to compile the submitted homeworks, the `framework.h` file has a hard-coded check for the `_HAS_CXX17` flag. As far as I know, this flag is only defined by MSVC, so gcc and clang users couldn't build their projects without either modifying `framework.h` or manually defining that flag.
+
+This project also chose to manually define the `_HAS_CXX17` flag, so that the `framework.h` file remains unmodified, and as close as possible to the internal framework used to compile the homeworks.
